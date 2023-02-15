@@ -1,7 +1,5 @@
 # Solidity Unitesting
 
-> You can find a better view [here](https://rain-backbone-44d.notion.site/Solidity-Unitesting-3cb8d666a3054b68875ed370162c3a3a)
-
 # Content
 
 - [Solidity Unitesting](#solidity-unitesting)
@@ -15,16 +13,12 @@
   - [Dissection](#dissection)
     - [Contract](#contract)
     - [Test](#test)
-  - [Contract](#contract-1)
+    - [Contract](#contract-1)
 - [Extra content](#extra-content)
-
----
 
 # Requirements
 
 - [Node.js](https://nodejs.org/en/) (_v18.14.0 LTS or higher_)
-
----
 
 # Set up
 
@@ -39,8 +33,6 @@ git clone https://github.com/Cocodrilette/solidity-unitesting-workshop
 ```shell
 npm install
 ```
-
----
 
 # Common Hardhat [tasks](https://hardhat.org/hardhat-runner/docs/advanced/create-task)
 
@@ -70,8 +62,6 @@ REPORT_GAS=true npx hardhat test
 npx hardhat node
 npx hardhat run scripts/deploy.ts
 ```
-
----
 
 # Walkthrough
 
@@ -227,7 +217,7 @@ describe("MultiSign", function () {
 
 Then we need to add transactions to approve later.
 
-## [Contract](contracts/MultiSign.sol)
+### [Contract](contracts/MultiSign.sol)
 
 ```solidity
 contract MultiSign {
@@ -356,8 +346,6 @@ contract MultiSign {
 }
 
 ```
-
----
 
 # Extra content
 
