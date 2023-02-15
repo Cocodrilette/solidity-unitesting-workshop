@@ -89,7 +89,7 @@ Usually a test looks like the code below. The building block of almost any test 
 
 Inside that describe, we have an `it` function. These are the specific unit test targets... just sound it out!: "I want it to x.", "I want it to y.", etc.
 
-```
+```typescript
 const { loadFixture } = require('@nomicfoundation/hardhat-network-helpers');
 const { expect } = require('chai');
 
