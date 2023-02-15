@@ -1,0 +1,23 @@
+{
+  "name": "solidity-unitesting-workshop",
+  "version": "1.0.0",
+  "description": "## Requirements",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cocodrilette/solidity-unitesting-workshop.git"
+  },
+  "author": "https://github.com/cocodrilette",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/cocodrilette/solidity-unitesting-workshop/issues"
+  },
+  "homepage": "https://github.com/cocodrilette/solidity-unitesting-workshop#readme",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^2.0.1",
+    "hardhat": "^2.12.7"
+  }
+}
