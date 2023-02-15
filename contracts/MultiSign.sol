@@ -5,29 +5,51 @@ pragma solidity 0.8.17;
 /// @author https://github.com/cocodrilette
 /// @notice This contract is indeed to be educational only. It is not a secure contract.
 contract MultiSign {
-    mapping(address => bool) private owners;
-    uint256 public ownersCount;
+    struct Transaction {
+        address to;
+        uint256 value;
+        bool executed;
+        bytes data;
+    }
+
+    /// @notice The required confirmations to execute a transaction
     uint256 public threshold;
-    // mapping(uint256 => Transaction) public transactions;
-    // mapping(uint256 => mapping(address => bool)) public confirmations;
-    // uint256 public transactionCount;
 
-    // struct Transaction {
-    //     address to;
-    //     uint256 value;
-    //     bool executed;
-    //     bytes data;
-    // }
+    uint256 public ownersCount;
+    mapping(address => bool) private owners;
 
-    // event TransactionCreated(uint256 txId);
-    // event TransactionConfirmed(address owner, uint256 txId);
-    // event TransactionSubmited(address destination, uint256 value);
+    mapping(bytes32 => Transaction) public transactions;
+
+    mapping(bytes32 => mapping(address => bool)) public confirmations;
+
+    event TransactionCreated(bytes32 txId);
+    event TransactionSubmitted(address destination, uint256 value);
+    event TransactionConfirmed(address owner, bytes32 txId);
     // event TransactionExecuted(uint256 txId, address destination, uint256 value);
 
     error NotAnOwner(address account);
 
     modifier onlyOwners() {
         if (!isOwner(msg.sender)) revert NotAnOwner(msg.sender);
+        _;
+    }
+
+    modifier validAddress(address _to) {
+        if (_to == address(0) && _to == address(this))
+            revert("MultiSign: Invalid address.");
+        _;
+    }
+
+    modifier validData(bytes memory _data) {
+        if (_data.length == 0) revert("MultiSign: Empty data is not valid.");
+        _;
+    }
+
+    modifier isExistingTransaction(bytes32 _txId) {
+        if (
+            keccak256(abi.encode(transactions[_txId])) !=
+            keccak256(abi.encode(transactions[bytes32(0x0)]))
+        ) revert("MultiSign: Transaction does not exist.");
         _;
     }
 
@@ -38,34 +60,55 @@ contract MultiSign {
         _setThreshold(_threshold);
     }
 
-    // function addTransaction(
-    //     address _destination,
-    //     uint256 _value,
-    //     bytes calldata _data
-    // ) internal onlyOwners returns (uint256) {
-    //     if (_destination == address(0)) revert();
-    //     uint256 txId = transactionCount;
-    //     transactionCount++;
-    //     transactions[txId] = Transaction({
-    //         to: _destination,
-    //         value: _value,
-    //         executed: false,
-    //         data: _data
-    //     });
+    function addTransaction(
+        address _to,
+        uint256 _value,
+        bytes memory _data
+    )
+        internal
+        onlyOwners
+        validAddress(_to)
+        validData(_data)
+        returns (bytes32 _txId)
+    {
+        _txId = _getHashId(_to, _value, _data);
 
-    //     emit TransactionCreated(txId);
-    //     return txId;
-    // }
+        transactions[_txId] = Transaction({
+            to: _to,
+            value: _value,
+            executed: false,
+            data: _data
+        });
 
-    // function confirmTransaction(uint256 _txId) public onlyOwners {
-    //     confirmations[_txId][msg.sender] = true;
+        emit TransactionCreated(_txId);
+    }
 
-    //     if (getConfirmationsCount(_txId) >= required) {
-    //         executeTransaction(_txId);
-    //     } else {
-    //         emit TransactionConfirmed(msg.sender, _txId);
-    //     }
-    // }
+    function submitTransaction(
+        address _to,
+        uint256 _value,
+        bytes calldata _data
+    ) external onlyOwners {
+        _confirmTransaction(addTransaction(_to, _value, _data));
+        emit TransactionSubmitted(_to, _value);
+    }
+
+    function confirmTransaction(bytes32 _txId) public onlyOwners {
+        _confirmTransaction(_txId);
+    }
+
+    function _confirmTransaction(
+        bytes32 _txId
+    ) internal isExistingTransaction(_txId) {
+        confirmations[_txId][msg.sender] = true;
+
+        emit TransactionConfirmed(msg.sender, _txId);
+
+        // if (getConfirmationsCount(_txId) >= required) {
+        //     executeTransaction(_txId);
+        // } else {
+        //     emit TransactionConfirmed(msg.sender, _txId);
+        // }
+    }
 
     // function getConfirmationsCount(
     //     uint256 transactionId
@@ -77,15 +120,6 @@ contract MultiSign {
     //         }
     //     }
     //     return confirmationsCount;
-    // }
-
-    // function submitTransaction(
-    //     address _destination,
-    //     uint256 _value,
-    //     bytes calldata _data
-    // ) external onlyOwners {
-    //     confirmTransaction(addTransaction(_destination, _value, _data));
-    //     emit TransactionSubmited(_destination, _value);
     // }
 
     // function isConfirmed(uint256 _txId) public view returns (bool) {
@@ -103,6 +137,10 @@ contract MultiSign {
 
     //     emit TransactionExecuted(_txId, _tx.to, _tx.value);
     // }
+
+    function isOwner(address _address) public view returns (bool _isOwner) {
+        _isOwner = owners[_address];
+    }
 
     function _setOwners(address[] memory _owners) private {
         if (_owners.length == 0) {
@@ -126,8 +164,14 @@ contract MultiSign {
         threshold = _threshold;
     }
 
-    function isOwner(address _address) public view returns (bool) {
-        return owners[_address];
+    function _getHashId(
+        address _to,
+        uint256 _value,
+        bytes memory _data
+    ) private view returns (bytes32 _hashId) {
+        _hashId = keccak256(
+            abi.encodePacked(_to, _value, _data, block.timestamp)
+        );
     }
 
     receive() external payable {}

@@ -1,5 +1,7 @@
 # Solidity Unitesting
 
+> You can find a better view [here](https://rain-backbone-44d.notion.site/Solidity-Unitesting-3cb8d666a3054b68875ed370162c3a3a)
+
 # Content
 
 - [Solidity Unitesting](#solidity-unitesting)
@@ -13,6 +15,7 @@
   - [Dissection](#dissection)
     - [Contract](#contract)
     - [Test](#test)
+  - [Contract](#contract-1)
 - [Extra content](#extra-content)
 
 ---
@@ -113,20 +116,13 @@ describe('Faucet', function () {
 
 First we need know how are the owners and what is the required threshold to execute a proposal.
 
-### Contract
+### [Contract](contracts/MultiSign.sol)
 
 ```solidity
 contract MultiSig {
     mapping(address => bool) public owners;
     uint256 private ownersCount;
     uint256 public threshold;
-
-    error NotAnOwner(address account);
-
-    modifier onlyOwners() {
-        if (!_isOwner(msg.sender)) revert NotAnOwner(msg.sender);
-        _;
-    }
 
     constructor(
         address[] memory _owners,
@@ -154,10 +150,6 @@ contract MultiSig {
         threshold = _threshold;
     }
 
-    function _isOwner(address _address) private view returns (bool) {
-        return owners[_address];
-    }
-
     receive() external payable {}
 
     fallback() external payable {}
@@ -165,7 +157,7 @@ contract MultiSig {
 
 ```
 
-### Test
+### [Test](test/MultiSign.ts)
 
 ```typescript
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
@@ -230,6 +222,150 @@ describe("MultiSign", function () {
     });
   });
 });
+```
+
+Then we need to add transactions to approve later.
+
+## [Contract](contracts/MultiSign.sol)
+
+```solidity
+contract MultiSign {
+    struct Transaction {
+        address to;
+        uint256 value;
+        bool executed;
+        bytes data;
+    }
+
+    /// @notice The required confirmations to execute a transaction
+    uint256 public threshold;
+
+    uint256 public ownersCount;
+    mapping(address => bool) private owners;
+
+    mapping(bytes32 => Transaction) public transactions;
+
+    mapping(bytes32 => mapping(address => bool)) public confirmations;
+
+    event TransactionCreated(bytes32 txId);
+    event TransactionSubmitted(address destination, uint256 value);
+    event TransactionConfirmed(address owner, bytes32 txId);
+
+    error NotAnOwner(address account);
+
+    modifier onlyOwners() {
+        if (!isOwner(msg.sender)) revert NotAnOwner(msg.sender);
+        _;
+    }
+
+    modifier validAddress(address _to) {
+        if (_to == address(0) && _to == address(this))
+            revert("MultiSign: Invalid address.");
+        _;
+    }
+
+    modifier validData(bytes memory _data) {
+        if (_data.length == 0) revert("MultiSign: Empty data is not valid.");
+        _;
+    }
+
+    modifier isExistingTransaction(bytes32 _txId) {
+        if (
+            keccak256(abi.encode(transactions[_txId])) !=
+            keccak256(abi.encode(transactions[bytes32(0x0)]))
+        ) revert("MultiSign: Transaction does not exist.");
+        _;
+    }
+
+    constructor(address[] memory _owners, uint256 _threshold) {
+        _setOwners(_owners);
+        _setThreshold(_threshold);
+    }
+
+    function addTransaction(
+        address _to,
+        uint256 _value,
+        bytes memory _data
+    )
+        internal
+        onlyOwners
+        validAddress(_to)
+        validData(_data)
+        returns (bytes32 _txId)
+    {
+        _txId = _getHashId(_to, _value, _data);
+
+        transactions[_txId] = Transaction({
+            to: _to,
+            value: _value,
+            executed: false,
+            data: _data
+        });
+
+        emit TransactionCreated(_txId);
+    }
+
+    function submitTransaction(
+        address _to,
+        uint256 _value,
+        bytes calldata _data
+    ) external onlyOwners {
+        _confirmTransaction(addTransaction(_to, _value, _data));
+        emit TransactionSubmitted(_to, _value);
+    }
+
+    function confirmTransaction(bytes32 _txId) public onlyOwners {
+        _confirmTransaction(_txId);
+    }
+
+    function _confirmTransaction(
+        bytes32 _txId
+    ) internal isExistingTransaction(_txId) {
+        confirmations[_txId][msg.sender] = true;
+        emit TransactionConfirmed(msg.sender, _txId);
+    }
+
+    function isOwner(address _address) public view returns (bool _isOwner) {
+        _isOwner = owners[_address];
+    }
+
+    function _setOwners(address[] memory _owners) private {
+        if (_owners.length == 0) {
+            revert(
+                "MultiSign: No valid owners length. At least one is required."
+            );
+        }
+        for (uint i = 0; i < _owners.length; i++) {
+            owners[_owners[i]] = true;
+            ownersCount++;
+        }
+    }
+
+    function _setThreshold(uint256 _threshold) private {
+        if (_threshold == 0)
+            revert(
+                "MultiSign: Invalid value threshold value of 0. Required threshold > 1"
+            );
+        if (_threshold > ownersCount)
+            revert("MultiSign. Setting more threshold than owners.");
+        threshold = _threshold;
+    }
+
+    function _getHashId(
+        address _to,
+        uint256 _value,
+        bytes memory _data
+    ) private view returns (bytes32 _hashId) {
+        _hashId = keccak256(
+            abi.encodePacked(_to, _value, _data, block.timestamp)
+        );
+    }
+
+    receive() external payable {}
+
+    fallback() external payable {}
+}
+
 ```
 
 ---
