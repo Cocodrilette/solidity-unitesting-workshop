@@ -90,21 +90,21 @@ Usually a test looks like the code below. The building block of almost any test 
 Inside that describe, we have an `it` function. These are the specific unit test targets... just sound it out!: "I want it to x.", "I want it to y.", etc.
 
 ```typescript
-const { loadFixture } = require('@nomicfoundation/hardhat-network-helpers');
-const { expect } = require('chai');
+const { loadFixture } = require("@nomicfoundation/hardhat-network-helpers");
+const { expect } = require("chai");
 
-describe('Faucet', function () {
+describe("Faucet", function () {
   async function deployContractAndSetVariables() {
-    const Faucet = await ethers.getContractFactory('Faucet');
+    const Faucet = await ethers.getContractFactory("Faucet");
     const faucet = await Faucet.deploy();
 
     const [owner] = await ethers.getSigners();
 
-    console.log('Signer 1 address: ', owner.address);
+    console.log("Signer 1 address: ", owner.address);
     return { faucet, owner };
   }
 
-  it('should deploy and set the owner correctly', async function () {
+  it("should deploy and set the owner correctly", async function () {
     const { faucet, owner } = await loadFixture(deployContractAndSetVariables);
 
     expect(await faucet.owner()).to.equal(owner.address);
@@ -361,5 +361,4 @@ contract MultiSign {
 
 # Extra content
 
-1. [Writing Upgradeable Contracts](https://docs.openzeppelin.com/upgrades-plugins/1.x/writing-upgradeable)
-2. [Get started with TypeScript](https://learn.microsoft.com/en-us/training/modules/typescript-get-started/)
+1. [Get started with TypeScript](https://learn.microsoft.com/en-us/training/modules/typescript-get-started/)
