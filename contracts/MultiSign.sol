@@ -15,8 +15,8 @@ contract MultiSign {
     /// @notice The required confirmations to execute a transaction
     uint256 public threshold;
 
-    uint256 public ownersCount;
     mapping(address => bool) private owners;
+    uint256 public ownersCount;
 
     mapping(bytes32 => Transaction) public transactions;
 

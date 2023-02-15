@@ -120,9 +120,10 @@ First we need know how are the owners and what is the required threshold to exec
 
 ```solidity
 contract MultiSig {
-    mapping(address => bool) public owners;
-    uint256 private ownersCount;
     uint256 public threshold;
+
+    mapping(address => bool) private owners;
+    uint256 public ownersCount;
 
     constructor(
         address[] memory _owners,
@@ -237,11 +238,7 @@ contract MultiSign {
         bytes data;
     }
 
-    /// @notice The required confirmations to execute a transaction
-    uint256 public threshold;
-
-    uint256 public ownersCount;
-    mapping(address => bool) private owners;
+    ...
 
     mapping(bytes32 => Transaction) public transactions;
 
@@ -341,15 +338,7 @@ contract MultiSign {
         }
     }
 
-    function _setThreshold(uint256 _threshold) private {
-        if (_threshold == 0)
-            revert(
-                "MultiSign: Invalid value threshold value of 0. Required threshold > 1"
-            );
-        if (_threshold > ownersCount)
-            revert("MultiSign. Setting more threshold than owners.");
-        threshold = _threshold;
-    }
+    ...
 
     function _getHashId(
         address _to,
