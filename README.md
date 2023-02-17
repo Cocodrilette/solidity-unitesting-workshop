@@ -37,6 +37,7 @@ git clone https://github.com/Cocodrilette/solidity-unitesting-workshop
 2. Install dependencies
 
 ```shell
+cd solidity-unitesting-workshop
 npm install
 ```
 
