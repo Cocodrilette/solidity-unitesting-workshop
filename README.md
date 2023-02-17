@@ -15,8 +15,6 @@
     - [Test](#test)
     - [Contract](#contract-1)
     - [Test](#test-1)
-    - [Contract](#contract-2)
-    - [Test](#test-2)
     - [Final contract](#final-contract)
 - [Exercise - Implement a ERC-20 from scratch](#exercise---implement-a-erc-20-from-scratch)
   - [Description](#description)
@@ -1020,7 +1018,7 @@ describe("MultiSign", function () {
 
 ## Description
 
-In this exercise you need to implement a ERC-20 implementation following the ERC-20 standard [here](https://eips.ethereum.org/EIPS/eip-20).
+In this exercise you need to implement a ERC-20 implementation following the ERC-20 standard [here](https://eips.ethereum.org/EIPS/eip-20). Use the `contracts/Token.sol` file.
 When you get that done execute the following command from the root folder.
 
 ```shell
