@@ -1,10 +1,10 @@
 {
   "name": "solidity-unitesting-workshop",
   "version": "1.0.0",
-  "description": "## Requirements",
+  "description": "Solidity unitesting workshop",
   "main": "index.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "npx hardhat test"
   },
   "repository": {
     "type": "git",

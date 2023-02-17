@@ -2,7 +2,7 @@ import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect, assert } from "chai";
 import { ethers } from "hardhat";
 import { iERC20 } from "./abi/erc20Fragment";
-import { getTxIdFromEvents } from "./helpers";
+import { getTxIdFromEvents } from "./utils/helpers";
 
 const parseEthers = ethers.utils.parseEther;
 const stringToBytes = ethers.utils.toUtf8Bytes;
