@@ -49,7 +49,7 @@ describe("MultiSign", function () {
       }
 
       assert(
-        (await multiSign.ownersCount()).toNumber() === 4,
+        (await multiSign.ownersCount()).toNumber() === OWNERS.length,
         `Owners count must be 4`
       );
     });
@@ -83,7 +83,7 @@ describe("MultiSign", function () {
       );
     });
 
-    it("Should not fund from third-party.", async () => {
+    it("Should not fund with zero vlue.", async () => {
       const { multiSign, OWNERS } = await loadFixture(deployFixture);
 
       const owner = OWNERS[0];
@@ -154,44 +154,47 @@ describe("MultiSign", function () {
     it("Should not submit with invalid `_to` value.", async () => {
       const { OWNERS, multiSign } = await loadFixture(deployFixture);
 
+      let tx1;
       // ! Zero address
       try {
-        const tx1 = await multiSign
+        tx1 = await multiSign
           .connect(OWNERS[0])
           .submitTransaction("0x0", parseEthers("1"), mintSignature);
-
+      } catch (error) {
         expect(tx1).to.revertedWith("MultiSign: Invalid address.");
-      } catch (error) {}
+      }
 
       // ! Contract address
+      let tx2;
       try {
-        const tx2 = await multiSign
+        tx2 = await multiSign
           .connect(OWNERS[0])
           .submitTransaction(
             multiSign.address,
             parseEthers("1"),
             mintSignature
           );
-
+      } catch (error) {
         expect(tx2).to.revertedWith("MultiSign: Invalid address.");
-      } catch (error) {}
+      }
     });
 
     it("Should not submit with invalid `_data` value.", async () => {
       const { OWNERS, multiSign, receiver } = await loadFixture(deployFixture);
       const owner = OWNERS[0];
 
+      let tx;
       try {
-        const tx = await multiSign
+        tx = await multiSign
           .connect(owner)
           .submitTransaction(
             receiver.address,
             parseEthers("0"),
             stringToBytes("")
           );
-
+      } catch (error) {
         expect(tx).to.revertedWith("MultiSign: Invalid address.");
-      } catch (error) {}
+      }
     });
   });
 

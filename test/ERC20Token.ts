@@ -78,13 +78,14 @@ describe("ERC20Token", function () {
 
       const VALUE = parseEthers("10");
 
+      let tx;
       try {
-        const tx = await erc20Token
+        tx = await erc20Token
           .connect(notOwnerAccount)
           .transfer(receiver.address, VALUE);
-
+      } catch (error) {
         expect(tx).revertedWith("ERC20: Not an owner");
-      } catch (error) {}
+      }
     });
   });
 
@@ -129,13 +130,14 @@ describe("ERC20Token", function () {
 
       const VALUE = parseEthers("10");
 
+      let tx;
       try {
-        const tx = await erc20Token
+        tx = await erc20Token
           .connect(notOwnerAccount)
           .transfer(receiver.address, VALUE);
-
+      } catch (error) {
         expect(tx).revertedWith("ERC20: Not an owner");
-      } catch (error) {}
+      }
     });
   });
 });
