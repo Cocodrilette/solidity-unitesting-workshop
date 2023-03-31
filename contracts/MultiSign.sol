@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.17;
+pragma solidity 0.8.16;
 
 /// @title This contract allow multiple user manage founds together.
 /// @author https://github.com/cocodrilette
